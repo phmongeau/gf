@@ -1795,6 +1795,7 @@ int GfMain(int argc, char **argv) {
 	fontCode = UIFontCreate(fontPath, fontSizeCode);
 	UIFontActivate(UIFontCreate(fontPath, fontSizeInterface));
 
+
 	windowMain = UIWindowCreate(0, maximize ? UI_WINDOW_MAXIMIZE : 0, "gf2", 0, 0);
 	windowMain->scale = uiScale;
 	windowMain->e.messageUser = WindowMessage;
@@ -1828,6 +1829,19 @@ int main(int argc, char **argv) {
 int main(int argc, char **argv) {
 	int code = GfMain(argc, argv);
 	if (code) return code;
+
+	if (isatty(STDOUT_FILENO)) {
+	    char ttyName[1024];
+	    ttyname_r(STDOUT_FILENO, ttyName, sizeof(ttyName));
+	    if (!strstr(ttyName, "/dev/tty")) {
+		char command[1024];
+		StringFormat(command, sizeof(command), "tty %s", ttyName);
+
+		usleep(1000000);
+
+		DebuggerSend(command, 1, 0);
+	    }
+	}
 
 	UIMessageLoop();
 	DebuggerClose();
