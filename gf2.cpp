@@ -1601,6 +1601,7 @@ int main(int argc, char **argv) {
 	fontCode = UIFontCreate(fontPath, fontSizeCode);
 	UIFontActivate(UIFontCreate(fontPath, fontSizeInterface));
 
+
 	windowMain = UIWindowCreate(0, maximize ? UI_WINDOW_MAXIMIZE : 0, "gf2", 0, 0);
 	windowMain->scale = uiScale;
 	windowMain->e.messageUser = WindowMessage;
@@ -1621,6 +1622,17 @@ int main(int argc, char **argv) {
 	pthread_mutex_init(&evaluateMutex, nullptr);
 	DebuggerStartThread();
 	CommandSyncWithGvim(nullptr);
+
+	if (isatty(STDOUT_FILENO)) {
+	    char ttyName[1024];
+	    ttyname_r(STDOUT_FILENO, ttyName, sizeof(ttyName));
+	    if (!strstr(ttyName, "/dev/tty")) {
+		char command[1024];
+		StringFormat(command, sizeof(command), "tty %s", ttyName);
+		DebuggerSend(command, 1, 1);
+	    }
+	}
+
 	UIMessageLoop();
 	DebuggerClose();
 
