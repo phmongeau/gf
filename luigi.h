@@ -3070,6 +3070,14 @@ int _UITextboxMessage(UIElement *element, UIMessage message, int di, void *dp) {
 			UIElementRepaint(element, NULL);
 			return 1;
 		}
+	} else if (message == UI_MSG_MIDDLE_DOWN) {
+		size_t bytes;
+		// TODO this is not good
+		ui.clipboardID = XInternAtom(ui.display, "PRIMARY", 0);
+		char *text = _UIClipboardReadTextStart(element->window, &bytes);
+		if (text) UITextboxReplace(textbox, text, bytes, true);
+		_UIClipboardReadTextEnd(element->window, text);
+		ui.clipboardID = XInternAtom(ui.display, "CLIPBOARD", 0);
 	}
 
 	return 0;
@@ -5360,7 +5368,6 @@ void UIWindowPostMessage(UIWindow *window, UIMessage message, void *_dp) {
 	XSendEvent(ui.display, window->window, True, KeyPressMask, (XEvent *) &event);
 	XFlush(ui.display);
 }
-
 #endif
 
 #ifdef UI_WINDOWS
